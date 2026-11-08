@@ -364,8 +364,11 @@ em {
 }
 
 .nav__mark {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--line-strong);
 }
 
 .nav__links {
