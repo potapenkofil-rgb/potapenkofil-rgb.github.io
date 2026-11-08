@@ -229,18 +229,13 @@ function playLoader(lenis, onReveal) {
 
 function setupHeroScroll(sphere, compact) {
   if (compact) {
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: '.hero',
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true,
-        onLeave: () => sphere.stop(),
-        onEnterBack: () => sphere.start(),
-      },
-    })
-      .to(sphere.state, { scrollSpread: 1.6, scrollFade: 1, ease: 'power1.in' }, 0)
-      .to('.hero__content', { yPercent: -12, opacity: 0, ease: 'power1.in' }, 0);
+    ScrollTrigger.create({
+      trigger: '.hero',
+      start: 'top top',
+      end: 'bottom top',
+      onLeave: () => sphere.stop(),
+      onEnterBack: () => sphere.start(),
+    });
     return;
   }
 
@@ -264,17 +259,7 @@ function setupHeroScroll(sphere, compact) {
 
 function setupManifesto(words, compact) {
   if (compact) {
-    gsap.fromTo(words, { opacity: 0.12 }, {
-      opacity: 1,
-      stagger: 0.1,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: '.manifesto__text',
-        start: 'top 85%',
-        end: 'bottom 50%',
-        scrub: true,
-      },
-    });
+    gsap.set(words, { opacity: 1 });
     return;
   }
 
@@ -586,7 +571,7 @@ function setupPlatforms(compact) {
   }
 }
 
-function setupStack() {
+function animateOrbitPlaneIn() {
   gsap.fromTo(
     '.orbit-plane',
     { rotateX: 62, scale: 0.72, opacity: 0.15 },
@@ -603,6 +588,12 @@ function setupStack() {
       },
     },
   );
+}
+
+function setupStack(compact) {
+  if (!compact) {
+    animateOrbitPlaneIn();
+  }
 
   ScrollTrigger.create({
     trigger: '.stack',
@@ -718,7 +709,11 @@ function setupProcess() {
   });
 }
 
-function setupCtaReveal() {
+function setupCtaReveal(compact) {
+  if (compact) {
+    return;
+  }
+
   gsap.fromTo(
     '.cta__title',
     { scale: 0.72, opacity: 0.1, filter: 'blur(14px)' },
@@ -866,9 +861,9 @@ function setupAnimatedPage() {
       setupServices(compact),
       setupPlatforms(compact),
     ];
-    setupStack();
+    setupStack(compact);
     setupProcess();
-    setupCtaReveal();
+    setupCtaReveal(compact);
     setupTitleReveals();
     setupReveals();
     setupNav();
