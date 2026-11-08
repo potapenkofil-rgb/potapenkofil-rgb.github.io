@@ -8,6 +8,7 @@ const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').m
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 const touchSceneStretch = isTouchDevice ? 1.5 : 1;
+const COMPACT_QUERY = '(max-width: 760px), (pointer: coarse) and (max-height: 520px)';
 
 function sceneLength(percent) {
   return `+=${percent * touchSceneStretch}%`;
@@ -93,10 +94,7 @@ function setupSmoothScroll() {
   const lenis = new Lenis({
     lerp: 0.085,
     wheelMultiplier: 1,
-    syncTouch: isTouchDevice,
-    syncTouchLerp: 0.07,
-    touchMultiplier: 0.9,
-    touchInertiaMultiplier: 16,
+    syncTouch: false,
   });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
@@ -120,6 +118,39 @@ function setupAnchorLinks(lenis) {
       }
     });
   });
+}
+
+function setupMenu(lenis) {
+  const root = document.documentElement;
+  const burger = document.querySelector('.nav__burger');
+  const menu = document.querySelector('.menu');
+  const compactQuery = window.matchMedia(COMPACT_QUERY);
+
+  function setOpen(open) {
+    if (root.classList.contains('menu-open') === open) {
+      return;
+    }
+    root.classList.toggle('menu-open', open);
+    burger.setAttribute('aria-expanded', String(open));
+    menu.setAttribute('aria-hidden', String(!open));
+
+    if (lenis) {
+      if (open) {
+        lenis.stop();
+      } else {
+        lenis.start();
+      }
+    }
+  }
+
+  burger.addEventListener('click', () => setOpen(!root.classList.contains('menu-open')));
+  menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => setOpen(false)));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      setOpen(false);
+    }
+  });
+  compactQuery.addEventListener('change', () => setOpen(false));
 }
 
 function setupNav() {
@@ -196,7 +227,23 @@ function playLoader(lenis, onReveal) {
     .add(onReveal, '-=0.5');
 }
 
-function setupHeroScroll(sphere) {
+function setupHeroScroll(sphere, compact) {
+  if (compact) {
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: '.hero',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        onLeave: () => sphere.stop(),
+        onEnterBack: () => sphere.start(),
+      },
+    })
+      .to(sphere.state, { scrollSpread: 1.6, scrollFade: 1, ease: 'power1.in' }, 0)
+      .to('.hero__content', { yPercent: -12, opacity: 0, ease: 'power1.in' }, 0);
+    return;
+  }
+
   const timeline = gsap.timeline({
     scrollTrigger: {
       trigger: '.hero',
@@ -215,9 +262,21 @@ function setupHeroScroll(sphere) {
     .to('.hero__scroll', { opacity: 0, duration: 0.15 }, 0);
 }
 
-function setupManifesto() {
-  const text = document.querySelector('.manifesto__text');
-  const words = splitIntoWords(text);
+function setupManifesto(words, compact) {
+  if (compact) {
+    gsap.fromTo(words, { opacity: 0.12 }, {
+      opacity: 1,
+      stagger: 0.1,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.manifesto__text',
+        start: 'top 85%',
+        end: 'bottom 50%',
+        scrub: true,
+      },
+    });
+    return;
+  }
 
   gsap.timeline({
     scrollTrigger: {
@@ -232,7 +291,63 @@ function setupManifesto() {
     .to({}, { duration: 0.6 });
 }
 
-function setupServices() {
+function setupServicesSwipe(section, cards, currentLabel, progressBar) {
+  const viewport = section.querySelector('.services__viewport');
+
+  function update() {
+    const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+    const progress = maxScroll > 0 ? viewport.scrollLeft / maxScroll : 0;
+    const step = cards[1].offsetLeft - cards[0].offsetLeft;
+    const activeIndex = progress > 0.99 ? cards.length : Math.round(viewport.scrollLeft / step) + 1;
+    currentLabel.textContent = String(activeIndex).padStart(2, '0');
+    progressBar.style.transform = `scaleX(${Math.max(progress, 1 / cards.length)})`;
+  }
+
+  viewport.addEventListener('scroll', update, { passive: true });
+  update();
+
+  cards.forEach((card) => {
+    const iconShapes = card.querySelectorAll('.service__icon [pathLength]');
+
+    if (iconShapes.length > 0) {
+      gsap.fromTo(
+        iconShapes,
+        { strokeDashoffset: 1, opacity: 0, fillOpacity: 0 },
+        {
+          strokeDashoffset: 0,
+          opacity: 1,
+          fillOpacity: 1,
+          duration: 1.4,
+          ease: 'sine.inOut',
+          stagger: 0.2,
+          scrollTrigger: {
+            trigger: card,
+            scroller: viewport,
+            horizontal: true,
+            start: 'left 85%',
+            once: true,
+          },
+        },
+      );
+    }
+  });
+
+  gsap.from(cards.slice(0, 2), {
+    x: 60,
+    opacity: 0,
+    duration: 1.2,
+    ease: 'expo.out',
+    stagger: 0.1,
+    scrollTrigger: { trigger: viewport, start: 'top 85%', once: true },
+  });
+
+  return () => {
+    viewport.removeEventListener('scroll', update);
+    viewport.scrollLeft = 0;
+  };
+}
+
+function setupServices(compact) {
   const section = document.querySelector('.services');
   const track = section.querySelector('.services__track');
   const cards = gsap.utils.toArray('.service', track);
@@ -247,6 +362,10 @@ function setupServices() {
     const activeIndex = Math.min(cards.length, Math.floor(progress * cards.length) + 1);
     currentLabel.textContent = String(activeIndex).padStart(2, '0');
     progressBar.style.transform = `scaleX(${progress})`;
+  }
+
+  if (compact) {
+    return setupServicesSwipe(section, cards, currentLabel, progressBar);
   }
 
   const horizontalScroll = gsap.to(track, {
@@ -305,7 +424,86 @@ function setupServices() {
   });
 }
 
-function setupPlatforms() {
+function setupPlatformTabs(section, device, screens, items, shapeFor, highlightPlatform) {
+  let current = 0;
+  let switching = null;
+  let autoplay = null;
+  let userTookOver = false;
+
+  function show(index) {
+    if (index === current) {
+      return;
+    }
+    const previous = current;
+    current = index;
+    highlightPlatform(index);
+
+    if (switching) {
+      switching.kill();
+    }
+    gsap.set(screens.filter((_, i) => i !== index && i !== previous), { autoAlpha: 0 });
+
+    switching = gsap.timeline()
+      .to(device, { ...shapeFor(index), duration: 0.9, ease: 'power3.inOut' }, 0)
+      .to(device, { scale: 0.92, rotateY: index % 2 === 0 ? -10 : 10, duration: 0.45, ease: 'power2.in' }, 0)
+      .to(device, { scale: 1, rotateY: 0, duration: 0.45, ease: 'power2.out' }, 0.45)
+      .to(screens[previous], { autoAlpha: 0, duration: 0.45, ease: 'sine.inOut' }, 0.1)
+      .to(screens[index], { autoAlpha: 1, duration: 0.45, ease: 'sine.inOut' }, 0.35);
+  }
+
+  function stopAutoplay() {
+    clearInterval(autoplay);
+    autoplay = null;
+  }
+
+  function startAutoplay() {
+    if (userTookOver || autoplay) {
+      return;
+    }
+    autoplay = setInterval(() => show((current + 1) % screens.length), 3200);
+  }
+
+  const handlers = items.map((item, index) => {
+    const select = (event) => {
+      if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') {
+        return;
+      }
+      event.preventDefault();
+      userTookOver = true;
+      stopAutoplay();
+      show(index);
+    };
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.addEventListener('click', select);
+    item.addEventListener('keydown', select);
+    return select;
+  });
+
+  ScrollTrigger.create({
+    trigger: section,
+    start: 'top 60%',
+    end: 'bottom 30%',
+    onToggle: (self) => (self.isActive ? startAutoplay() : stopAutoplay()),
+    onRefresh: () => gsap.set(device, shapeFor(current)),
+  });
+
+  return () => {
+    stopAutoplay();
+    if (switching) {
+      switching.kill();
+    }
+    items.forEach((item, index) => {
+      item.removeAttribute('role');
+      item.removeAttribute('tabindex');
+      item.removeEventListener('click', handlers[index]);
+      item.removeEventListener('keydown', handlers[index]);
+    });
+    highlightPlatform(0);
+  };
+}
+
+function setupPlatforms(compact) {
   const section = document.querySelector('.platforms');
   const stage = section.querySelector('.platforms__stage');
   const device = section.querySelector('.device');
@@ -347,6 +545,10 @@ function setupPlatforms() {
   gsap.set(device, shapeFor(0));
   gsap.set(screens, { autoAlpha: 0 });
   gsap.set(screens[0], { autoAlpha: 1 });
+
+  if (compact) {
+    return setupPlatformTabs(section, device, screens, items, shapeFor, highlightPlatform);
+  }
 
   const switchTimes = [];
   const holdDuration = 0.7;
@@ -516,7 +718,7 @@ function setupProcess() {
   });
 }
 
-function setupCta() {
+function setupCtaReveal() {
   gsap.fromTo(
     '.cta__title',
     { scale: 0.72, opacity: 0.1, filter: 'blur(14px)' },
@@ -534,6 +736,9 @@ function setupCta() {
     },
   );
 
+}
+
+function setupCtaGlow() {
   if (!hasFinePointer) {
     return;
   }
@@ -648,25 +853,37 @@ function setupAnimatedPage() {
   const sphere = createParticleSphere(document.querySelector('.hero__canvas'));
   const lenis = setupSmoothScroll();
   const heroIntro = createHeroIntro(sphere);
+  const manifestoWords = splitIntoWords(document.querySelector('.manifesto__text'));
 
+  setupMenu(lenis);
   setupAnchorLinks(lenis);
-  setupHeroScroll(sphere);
-  setupManifesto();
-  setupServices();
-  setupPlatforms();
-  setupStack();
+
+  gsap.matchMedia().add({ compact: COMPACT_QUERY, any: '(min-width: 0px)' }, (context) => {
+    const { compact } = context.conditions;
+    const cleanups = [
+      setupHeroScroll(sphere, compact),
+      setupManifesto(manifestoWords, compact),
+      setupServices(compact),
+      setupPlatforms(compact),
+    ];
+    setupStack();
+    setupProcess();
+    setupCtaReveal();
+    setupTitleReveals();
+    setupReveals();
+    setupNav();
+    setupPageProgress();
+    sphere.start();
+
+    return () => cleanups.forEach((cleanup) => cleanup && cleanup());
+  });
+
   setupMarquee(lenis);
-  setupProcess();
-  setupCta();
-  setupTitleReveals();
-  setupReveals();
-  setupNav();
-  setupPageProgress();
+  setupCtaGlow();
   setupProjectPreview();
   setupMagneticButtons();
   setupSpotlights();
 
-  sphere.start();
   document.fonts.ready.then(() => ScrollTrigger.refresh());
   playLoader(lenis, () => heroIntro.play());
 }
@@ -681,6 +898,7 @@ function setupStaticPage() {
     screen.style.opacity = index === 0 ? '1' : '0';
   });
 
+  setupMenu(null);
   setupAnchorLinks(null);
   setupSpotlights();
 }

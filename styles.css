@@ -2160,3 +2160,216 @@ em {
 .project__link:hover {
   text-decoration: underline;
 }
+
+.nav__burger,
+.menu {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .nav__inner {
+    gap: 10px;
+  }
+
+  .nav__logo {
+    margin-right: auto;
+  }
+
+  .nav__burger {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid var(--line-strong);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav__burger span {
+    display: block;
+    width: 16px;
+    height: 1.5px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 0.5s var(--ease);
+  }
+
+  .menu-open .nav__burger span:first-child {
+    transform: translateY(3.75px) rotate(45deg);
+  }
+
+  .menu-open .nav__burger span:last-child {
+    transform: translateY(-3.75px) rotate(-45deg);
+  }
+
+  .menu-open .nav {
+    background: transparent;
+    border-bottom-color: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(96px + env(safe-area-inset-top)) var(--gutter) calc(28px + env(safe-area-inset-bottom));
+    background: rgba(5, 5, 6, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.45s var(--ease), visibility 0s linear 0.45s;
+  }
+
+  .menu-open .menu {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.45s var(--ease), visibility 0s;
+  }
+
+  .menu__links {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .menu__links a {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: clamp(34px, 10vw, 44px);
+    font-weight: 600;
+    letter-spacing: -0.04em;
+    line-height: 1.1;
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s var(--ease), transform 0.8s var(--ease);
+  }
+
+  .menu__links small {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0;
+    color: var(--dim);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .menu-open .menu__links a {
+    opacity: 1;
+    transform: none;
+  }
+
+  .menu-open .menu__links a:nth-child(1) { transition-delay: 0.06s; }
+  .menu-open .menu__links a:nth-child(2) { transition-delay: 0.1s; }
+  .menu-open .menu__links a:nth-child(3) { transition-delay: 0.14s; }
+  .menu-open .menu__links a:nth-child(4) { transition-delay: 0.18s; }
+  .menu-open .menu__links a:nth-child(5) { transition-delay: 0.22s; }
+
+  .menu__footer {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    opacity: 0;
+    transition: opacity 0.6s var(--ease) 0.2s;
+  }
+
+  .menu-open .menu__footer {
+    opacity: 1;
+  }
+
+  .menu__footer .button {
+    width: 100%;
+  }
+
+  .menu__footer p {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .manifesto {
+    min-height: 0;
+    padding: 120px 0 96px;
+  }
+
+  .services {
+    height: auto;
+    min-height: 0;
+    padding: 96px 0 24px;
+    gap: 28px;
+    overflow: visible;
+  }
+
+  .services__head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .services__counter {
+    display: flex;
+    padding-bottom: 0;
+  }
+
+  .services__viewport {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+  }
+
+  .services__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .services__track {
+    will-change: auto;
+  }
+
+  .service {
+    width: min(82vw, 340px);
+    height: auto;
+    min-height: 380px;
+    scroll-snap-align: start;
+  }
+
+  .platforms {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .platforms__inner {
+    height: auto;
+    padding-top: 96px;
+    padding-bottom: 24px;
+  }
+
+  .platforms__item {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.4s var(--ease), border-color 0.4s var(--ease), background-color 0.4s var(--ease);
+  }
+
+  .platforms__stage {
+    height: clamp(420px, 66svh, 560px);
+  }
+}
