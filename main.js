@@ -6,6 +6,12 @@ const STACK_RINGS = [
 
 const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+const touchSceneStretch = isTouchDevice ? 1.5 : 1;
+
+function sceneLength(percent) {
+  return `+=${percent * touchSceneStretch}%`;
+}
 
 function buildOrbits() {
   const system = document.querySelector('.orbit-system');
@@ -84,7 +90,14 @@ function splitIntoWords(container) {
 }
 
 function setupSmoothScroll() {
-  const lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 1 });
+  const lenis = new Lenis({
+    lerp: 0.085,
+    wheelMultiplier: 1,
+    syncTouch: isTouchDevice,
+    syncTouchLerp: 0.07,
+    touchMultiplier: 0.9,
+    touchInertiaMultiplier: 16,
+  });
   lenis.on('scroll', ScrollTrigger.update);
   gsap.ticker.add((time) => lenis.raf(time * 1000));
   gsap.ticker.lagSmoothing(0);
@@ -188,7 +201,7 @@ function setupHeroScroll(sphere) {
     scrollTrigger: {
       trigger: '.hero',
       start: 'top top',
-      end: '+=100%',
+      end: sceneLength(100),
       pin: true,
       scrub: true,
       onLeave: () => sphere.stop(),
@@ -210,7 +223,7 @@ function setupManifesto() {
     scrollTrigger: {
       trigger: '.manifesto',
       start: 'top top',
-      end: '+=100%',
+      end: sceneLength(100),
       pin: true,
       scrub: true,
     },
@@ -242,7 +255,7 @@ function setupServices() {
     scrollTrigger: {
       trigger: section,
       start: 'top top',
-      end: () => `+=${scrollDistance() * 0.8}`,
+      end: () => `+=${scrollDistance() * 0.8 * touchSceneStretch}`,
       pin: true,
       scrub: 0.8,
       invalidateOnRefresh: true,
@@ -347,7 +360,7 @@ function setupPlatforms() {
     scrollTrigger: {
       trigger: section,
       start: 'top top',
-      end: '+=270%',
+      end: sceneLength(270),
       pin: true,
       scrub: 1,
       invalidateOnRefresh: true,
