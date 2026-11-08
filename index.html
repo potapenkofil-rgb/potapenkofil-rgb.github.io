@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Inter+Tight:wght@300;400;500;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
   <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
@@ -48,8 +48,26 @@
         <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4 3 11l6 2.2M21 4l-3 16-6.5-5.3M21 4 9 13.2m0 0V19l2.5-4.3"/></svg>
         <span>Написать</span>
       </a>
+      <button class="nav__burger" type="button" aria-label="Меню" aria-expanded="false" aria-controls="menu"><span></span><span></span></button>
     </div>
   </header>
+
+  <div class="menu" id="menu" aria-hidden="true">
+    <nav class="menu__links" aria-label="Разделы">
+      <a href="#services"><small>01</small>Услуги</a>
+      <a href="#platforms"><small>02</small>Платформы</a>
+      <a href="#stack"><small>03</small>Стек</a>
+      <a href="#projects"><small>04</small>Проекты</a>
+      <a href="#process"><small>05</small>Процесс</a>
+    </nav>
+    <div class="menu__footer">
+      <a class="button" href="https://t.me/wyexqq" target="_blank" rel="noopener">
+        <svg class="button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 4 3 11l6 2.2M21 4l-3 16-6.5-5.3M21 4 9 13.2m0 0V19l2.5-4.3"/></svg>
+        <span>@wyexqq</span>
+      </a>
+      <p>Telegram — самый быстрый способ связаться</p>
+    </div>
+  </div>
 
   <main>
     <section class="hero" id="top">
@@ -497,6 +515,6 @@
   <script src="vendor/ScrollTrigger.min.js"></script>
   <script src="vendor/lenis.min.js"></script>
   <script src="particles.js?v=4"></script>
-  <script src="main.js?v=4"></script>
+  <script src="main.js?v=5"></script>
 </body>
 </html>
