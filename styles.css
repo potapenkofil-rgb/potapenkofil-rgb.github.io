@@ -2061,32 +2061,6 @@ em {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .js .loader {
-    display: none;
-  }
-
-  .services {
-    height: auto;
-  }
-
-  .services__viewport {
-    overflow-x: auto;
-    padding-bottom: 12px;
-  }
-
-  .platforms {
-    height: auto;
-  }
-
-  .orbit,
-  .orbit__chip,
-  .hero__scroll-line::after,
-  .hero__badge-dot {
-    animation-play-state: paused;
-  }
-}
-
 .guarantees {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -5,7 +5,6 @@ const STACK_RINGS = [
 ];
 
 const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 const touchSceneStretch = isTouchDevice ? 1.5 : 1;
 const COMPACT_QUERY = '(max-width: 760px), (pointer: coarse) and (max-height: 520px)';
@@ -883,21 +882,6 @@ function setupAnimatedPage() {
   playLoader(lenis, () => heroIntro.play());
 }
 
-function setupStaticPage() {
-  const sphere = createParticleSphere(document.querySelector('.hero__canvas'));
-  sphere.drawFrame();
-
-  const screens = document.querySelectorAll('.screen');
-  screens.forEach((screen, index) => {
-    screen.style.visibility = index === 0 ? 'visible' : 'hidden';
-    screen.style.opacity = index === 0 ? '1' : '0';
-  });
-
-  setupMenu(null);
-  setupAnchorLinks(null);
-  setupSpotlights();
-}
-
 function init() {
   const librariesLoaded = Boolean(window.gsap && window.ScrollTrigger && window.Lenis);
   if (!librariesLoaded) {
@@ -916,11 +900,6 @@ function init() {
   buildOrbits();
   buildMarquee();
   setupCopyButtons();
-
-  if (prefersReducedMotion) {
-    setupStaticPage();
-    return;
-  }
 
   setupAnimatedPage();
 }
